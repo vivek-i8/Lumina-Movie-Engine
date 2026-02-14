@@ -65,3 +65,52 @@ class ContentEngine:
             
         # Sort
         return sorted(ranked_results, key=lambda x: x['match_score'], reverse=True)
+
+
+@st.cache_resource
+def load_data():
+    """
+    Robust Data Loader with Self-Healing Embeddings.
+    1. Checks for 'tmdb_5000_movies.csv'. If missing -> Stops App.
+    2. Checks for 'embeddings.pkl'. 
+       - If missing -> Generates them using ContentEngine (Self-Healing).
+       - Saves them to disk for next time.
+    """
+    import pandas as pd
+    import pickle
+    import os
+    
+    # 1. CSV CHECK
+    if not os.path.exists("tmdb_5000_movies.csv"):
+        st.error("🚨 Critical Error: 'tmdb_5000_movies.csv' not found!")
+        st.info("ℹ️ Please download the dataset from Kaggle and place it in the project root.")
+        st.stop()
+        
+    df = pd.read_csv("tmdb_5000_movies.csv")
+    
+    # 2. EMBEDDINGS CHECK (Self-Healing)
+    embeddings = None
+    if os.path.exists("embeddings.pkl"):
+        print("✅ Loading embeddings from disk...")
+        with open("embeddings.pkl", "rb") as f:
+            embeddings = pickle.load(f)
+    else:
+        print("⚠️ Embeddings not found. Generating now (Self-Healing)...")
+        with st.spinner("⚙️ First-run setup: Generating AI embeddings... (This takes ~1 minute)"):
+            # Initialize engine temporarily to use its model
+            engine = ContentEngine()
+            
+            # Prepare Text
+            # Naive fillna to prevent errors
+            df['overview'] = df['overview'].fillna('')
+            df['combined_text'] = df.apply(lambda x: f"Movie: {x['title']}. Plot: {x['overview']}", axis=1)
+            
+            # Encode
+            embeddings = engine.model.encode(df['combined_text'].tolist(), show_progress_bar=True)
+            
+            # Save
+            with open("embeddings.pkl", "wb") as f:
+                pickle.dump(embeddings, f)
+            print("✅ Embeddings saved successfully.")
+            
+    return df, embeddings

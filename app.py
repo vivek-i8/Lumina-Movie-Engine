@@ -6,7 +6,7 @@ import requests
 import os
 
 from utils import fetch_smart_candidates, fetch_extended_details, fetch_trending
-from recommender import ContentEngine
+from recommender import ContentEngine, load_data
 
 # --- CONFIG & STYLES ---
 st.set_page_config(page_title="Lumina", page_icon="🎬", layout="wide", initial_sidebar_state="expanded")
@@ -123,7 +123,16 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# --- INITIALIZATION ---
+# --- INITIALIZATION & DATA LOADING ---
+data_load_state = st.text('Loading data...')
+# 1. LOAD DATA (Self-Healing)
+try:
+    movies_df, embeddings = load_data()
+    data_load_state.text("") # Clear loading text
+except Exception as e:
+    st.error(f"Error loading data: {e}")
+    st.stop()
+
 @st.cache_resource
 def get_engine(): return ContentEngine()
 engine = get_engine()
