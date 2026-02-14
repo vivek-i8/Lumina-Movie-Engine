@@ -1,0 +1,17 @@
+# Security
+.env
+.streamlit/secrets.toml
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environments
+venv/
+.venv/
+env/
+
+# Large Files
+*.pkl
+tmdb_5000_movies.csv
