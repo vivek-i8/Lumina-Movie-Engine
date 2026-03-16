@@ -124,17 +124,19 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # --- INITIALIZATION & DATA LOADING ---
-data_load_state = st.text('Loading data...')
-# 1. LOAD DATA (Self-Healing)
+# 1. LOAD DATA (Cached in-memory resources)
+@st.cache_resource
+def get_cached_data():
+    return load_data()
+
 try:
-    movies_df, embeddings = load_data()
-    data_load_state.text("") # Clear loading text
+    movies_df, embeddings = get_cached_data()
 except Exception as e:
     st.error(f"Error loading data: {e}")
     st.stop()
 
 @st.cache_resource
-def get_engine(): return ContentEngine()
+def get_engine(): return ContentEngine(embeddings=embeddings)
 engine = get_engine()
 
 # --- SECURITY ---
