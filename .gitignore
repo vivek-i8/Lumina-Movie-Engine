@@ -14,4 +14,3 @@ env/
 
 # Large Files
 *.pkl
-tmdb_5000_movies.csv
