@@ -14,3 +14,4 @@ env/
 
 # Large Files
 *.pkl
+!movie_embeddings.pkl
