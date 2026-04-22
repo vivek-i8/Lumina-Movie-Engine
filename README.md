@@ -10,7 +10,7 @@
 
 ---
 
-*(Local development version. Web deployment in progress.)*
+*Website Link - https://lumina-movie-recommendations.streamlit.app/*
 
 </div>
 
